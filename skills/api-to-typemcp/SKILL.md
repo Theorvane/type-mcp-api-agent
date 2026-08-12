@@ -26,7 +26,7 @@ metadata:
 
 This released skill is a complete, bundled generator delivery unit. Its **bundled skill engine** is in `scripts/`, its controlled TypeScript output templates are in `templates/`, and its public TypeMCP runtime constraints are in [references/type-mcp-runtime.md](references/type-mcp-runtime.md).
 
-Generated projects use the current published `@theorvane/type-mcp@0.3.1` release line and only its public package exports; they never copy TypeMCP source or use local, `file:`, `git:`, `link:`, or private runtime APIs. Keep this release-line statement at 0.3.1 until 0.3.2 is actually published and reviewed; 0.3.2 is a future upgrade note, not a claim that it is published.
+Generated projects use the current published `@theorvane/type-mcp@0.3.2` release line and only its public package exports; they never copy TypeMCP source or use local, `file:`, `git:`, `link:`, or private runtime APIs. The npm registry `gitHead` and GitHub Release `v0.3.2` both resolve to `e75bcf6a81ef4df57301b6154a0088845020886f`.
 
 ## When to use
 
@@ -135,6 +135,6 @@ These are distinct entrypoints with distinct decorator semantics. Do not change 
 - [ ] Digest approval and a valid single-use receipt precede generation.
 - [ ] Output target passed the empty/replace and traversal/symlink safety gates.
 - [ ] Protected writes are authorized before request construction.
-- [ ] Generated project uses the published `@theorvane/type-mcp@0.3.1` release line only and includes a reviewed `package-lock.json`; do not describe 0.3.2 as published before its publication and review.
+- [ ] Generated project uses the published `@theorvane/type-mcp@0.3.2` release line only and includes a reviewed `package-lock.json`; confirm registry provenance before changing this version.
 - [ ] Contained `npm ci --ignore-scripts`/typecheck/test/build/MCP smoke passes; external sandboxing is used for untrusted dependency installation.
 - [ ] Immediately before GitHub publication, user confirms owner/name/visibility/source branch and the resolved branch matches.

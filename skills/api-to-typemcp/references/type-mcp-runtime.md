@@ -1,12 +1,12 @@
 # TypeMCP Runtime Contract
 
-Generated projects use the reviewed public npm package on the current 0.3.1 release line:
+Generated projects use the reviewed public npm package on the current 0.3.2 release line:
 
 ```json
-"@theorvane/type-mcp": "0.3.1"
+"@theorvane/type-mcp": "0.3.2"
 ```
 
-Keep this compatibility statement on `@theorvane/type-mcp@0.3.1` until 0.3.2 is actually published and reviewed. Version 0.3.2 is a future upgrade target, not a published-release claim.
+`@theorvane/type-mcp@0.3.2` is published with npm registry `gitHead` and GitHub Release `v0.3.2` both resolving to `e75bcf6a81ef4df57301b6154a0088845020886f`.
 
 ## Allowed public API
 
@@ -27,7 +27,7 @@ Generated TypeScript uses only these public exports:
 
 `createMcpServer` and `startStdioServer` are asynchronous and must be awaited. Standard decorators use TC39 semantics: generated `tsconfig.json` must not enable legacy `experimentalDecorators` or `emitDecoratorMetadata`.
 
-`@McpTool` requires an `input` Zod object. Generated code pins Zod v4 (`^4.4.3`) because that is the compatible public runtime contract for `@theorvane/type-mcp@0.3.1`.
+`@McpTool` requires an `input` Zod object. Generated code pins Zod v4 (`^4.4.3`) because that is the compatible public runtime contract for `@theorvane/type-mcp@0.3.2`.
 
 ## Legacy decorator compatibility
 
