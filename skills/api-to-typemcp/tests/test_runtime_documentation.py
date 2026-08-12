@@ -7,8 +7,8 @@ from pathlib import Path
 
 
 SKILL_ROOT = Path(__file__).resolve().parents[1]
-TYPE_MCP_CURRENT_RELEASE = "@theorvane/type-mcp@0.3.1"
-TYPE_MCP_FUTURE_RELEASE = "0.3.2"
+TYPE_MCP_CURRENT_RELEASE = "@theorvane/type-mcp@0.3.2"
+TYPE_MCP_RELEASE_SHA = "e75bcf6a81ef4df57301b6154a0088845020886f"
 STANDARD_DECORATOR_IMPORT = 'import { McpServer, McpTool } from "@theorvane/type-mcp"'
 LEGACY_DECORATOR_IMPORT = 'import { McpServer, McpTool } from "@theorvane/type-mcp/legacy"'
 
@@ -28,8 +28,9 @@ class RuntimeDocumentationContractTests(unittest.TestCase):
                 self.assertIn("CommonJS/Node16", content)
                 self.assertIn("experimentalDecorators", content)
                 self.assertIn("distinct entrypoints", content)
-                self.assertIn(TYPE_MCP_FUTURE_RELEASE, content)
-                self.assertNotIn("0.3.2 is published", content)
+                self.assertIn("published", content)
+                self.assertIn(TYPE_MCP_RELEASE_SHA, content)
+                self.assertNotIn("future upgrade", content)
 
     def test_generator_remains_standard_esm_without_legacy_decorator_changes(self) -> None:
         """Compatibility docs must not redirect generated output to legacy CJS."""
