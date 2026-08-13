@@ -281,6 +281,24 @@ def verify_project(
         if not results["install"]["ok"]:
             return results
 
+        # Record the runtime actually installed into this isolated consumer.
+        # This makes the contained E2E contract independent of the rendered
+        # declaration and preserves registry provenance from the lockfile.
+        runtime_package = proj / "node_modules" / "@theorvane" / "type-mcp" / "package.json"
+        try:
+            installed_package = json.loads(runtime_package.read_text(encoding="utf-8"))
+            installed_lockfile = json.loads((proj / "package-lock.json").read_text(encoding="utf-8"))
+            installed_lock = installed_lockfile["packages"]["node_modules/@theorvane/type-mcp"]
+            results["installed_runtime"] = {
+                "ok": True,
+                "version": installed_package.get("version"),
+                "resolved": installed_lock.get("resolved"),
+                "integrity": installed_lock.get("integrity"),
+            }
+        except (KeyError, OSError, json.JSONDecodeError) as exc:
+            results["installed_runtime"] = {"ok": False, "error": str(exc)}
+            return results
+
         # 3. Typecheck.
         results["typecheck"] = _run_step(
             ["npx", "tsc", "--noEmit"], str(proj), env, timeout=120,
