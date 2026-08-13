@@ -10,14 +10,16 @@ import re
 import tempfile
 import textwrap
 import unittest
+from urllib.error import HTTPError
 from email.message import Message
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 ROOT = Path(__file__).resolve().parents[2]
 SKILL = ROOT / "skills/api-to-typemcp/SKILL.md"
 WORKFLOW = ROOT / ".github/workflows/skill-release.yml"
 PUBLISHER = ROOT / ".agents/scripts/publish_skills_hub.py"
+CLAWHUB_WAITER = ROOT / ".agents/scripts/wait_for_clawhub_publication.py"
 SEMVER = re.compile(
     r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)"
     r"(?:-(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*)?"
@@ -74,7 +76,7 @@ class SkillReleaseTests(unittest.TestCase):
                 else:
                     os.environ["GITHUB_OUTPUT"] = previous_output
 
-            self.assertEqual(output_path.read_text(encoding="utf-8"), "skill_version=0.2.3\ntag=v0.2.3\n")
+            self.assertEqual(output_path.read_text(encoding="utf-8"), "skill_version=0.2.4\ntag=v0.2.4\n")
 
     def test_version_extraction_step_rejects_invalid_numeric_prerelease_identifiers(self) -> None:
         workflow = WORKFLOW.read_text(encoding="utf-8")
@@ -94,7 +96,7 @@ class SkillReleaseTests(unittest.TestCase):
                 skill_path = root / "skills/api-to-typemcp/SKILL.md"
                 skill_path.parent.mkdir(parents=True)
                 skill_path.write_text(
-                    original.replace("version: 0.2.3", f"version: {invalid_version}"),
+                    original.replace("version: 0.2.4", f"version: {invalid_version}"),
                     encoding="utf-8",
                 )
                 previous_cwd = Path.cwd()
@@ -252,9 +254,9 @@ class SkillReleaseTests(unittest.TestCase):
             [
                 (200, {"data": [{"slug": "integration"}]}),
                 (200, {"slug": "api-to-typemcp", "status": "DRAFT"}),
-                (200, {"slug": "api-to-typemcp", "status": "PUBLISHED", "latestVersion": "0.2.3"}),
-                (200, [{"version": "0.2.3"}]),
-                (200, {"slug": "api-to-typemcp", "status": "PUBLISHED", "latestVersion": "0.2.3"}),
+                (200, {"slug": "api-to-typemcp", "status": "PUBLISHED", "latestVersion": "0.2.4"}),
+                (200, [{"version": "0.2.4"}]),
+                (200, {"slug": "api-to-typemcp", "status": "PUBLISHED", "latestVersion": "0.2.4"}),
             ]
         )
         calls: list[tuple[str, str]] = []
@@ -267,7 +269,7 @@ class SkillReleaseTests(unittest.TestCase):
 
         environment = {
             "SKILLS_HUB_AI_API_KEY": "test-key",
-            "SKILL_VERSION": "0.2.3",
+            "SKILL_VERSION": "0.2.4",
             "GITHUB_SHA": "test-sha",
             "GITHUB_REPOSITORY": "Theorvane/type-mcp-api-agent-skill",
         }
@@ -289,8 +291,8 @@ class SkillReleaseTests(unittest.TestCase):
                 (200, {"slug": "api-to-typemcp", "status": "PUBLISHED"}),
                 (200, []),
                 (409, {"error": "version already exists"}),
-                (200, [{"version": "0.2.3"}]),
-                (200, {"slug": "api-to-typemcp", "status": "PUBLISHED", "latestVersion": "0.2.3"}),
+                (200, [{"version": "0.2.4"}]),
+                (200, {"slug": "api-to-typemcp", "status": "PUBLISHED", "latestVersion": "0.2.4"}),
             ]
         )
         calls: list[tuple[str, str]] = []
@@ -303,7 +305,7 @@ class SkillReleaseTests(unittest.TestCase):
 
         environment = {
             "SKILLS_HUB_AI_API_KEY": "test-key",
-            "SKILL_VERSION": "0.2.3",
+            "SKILL_VERSION": "0.2.4",
             "GITHUB_SHA": "test-sha",
             "GITHUB_REPOSITORY": "Theorvane/type-mcp-api-agent-skill",
         }
@@ -388,16 +390,135 @@ class SkillReleaseTests(unittest.TestCase):
         self.assertIn("permissions:\n      contents: read", publish.group("body"))
         self.assertEqual(publish.group("body").count("persist-credentials: false"), 2)
 
+    def test_clawhub_pending_publication_is_reconciled_without_a_second_publish(self) -> None:
+        spec = importlib.util.spec_from_file_location("wait_for_clawhub_publication", CLAWHUB_WAITER)
+        self.assertIsNotNone(spec)
+        assert spec is not None and spec.loader is not None
+        waiter = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(waiter)
+
+        class Response:
+            status = 200
+
+            def __init__(self, payload: object) -> None:
+                self.payload = json.dumps(payload).encode("utf-8")
+
+            def read(self) -> bytes:
+                return self.payload
+
+            def __enter__(self) -> "Response":
+                return self
+
+            def __exit__(self, *_: object) -> None:
+                return None
+
+        pending = HTTPError("https://clawhub.ai", 404, "missing", Message(), None)
+        payload = waiter.wait_for_publication(
+            "https://clawhub.ai",
+            "api-to-typemcp",
+            "0.2.4",
+            attempts=2,
+            delay_seconds=0,
+            opener=Mock(side_effect=[pending, Response({"version": {"version": "0.2.4"}})]),
+            sleep=Mock(),
+        )
+        self.assertEqual(payload["version"], {"version": "0.2.4"})
+
+    def test_clawhub_pending_publication_times_out_and_mismatched_versions_fail_closed(self) -> None:
+        spec = importlib.util.spec_from_file_location("wait_for_clawhub_publication", CLAWHUB_WAITER)
+        self.assertIsNotNone(spec)
+        assert spec is not None and spec.loader is not None
+        waiter = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(waiter)
+
+        pending = HTTPError("https://clawhub.ai", 404, "missing", Message(), None)
+        with self.assertRaisesRegex(SystemExit, "not publicly available"):
+            waiter.wait_for_publication(
+                "https://clawhub.ai",
+                "api-to-typemcp",
+                "0.2.4",
+                attempts=1,
+                delay_seconds=0,
+                opener=Mock(side_effect=[pending]),
+                sleep=Mock(),
+            )
+
+        class Response:
+            status = 200
+
+            def read(self) -> bytes:
+                return b'{"version":{"version":"0.2.2"}}'
+
+            def __enter__(self) -> "Response":
+                return self
+
+            def __exit__(self, *_: object) -> None:
+                return None
+
+        with self.assertRaisesRegex(SystemExit, "mismatched version"):
+            waiter.wait_for_publication(
+                "https://clawhub.ai",
+                "api-to-typemcp",
+                "0.2.4",
+                attempts=1,
+                delay_seconds=0,
+                opener=Mock(return_value=Response()),
+                sleep=Mock(),
+            )
+
+        upstream_error = HTTPError("https://clawhub.ai", 503, "unavailable", Message(), None)
+        with self.assertRaisesRegex(SystemExit, "HTTP 503"):
+            waiter.wait_for_publication(
+                "https://clawhub.ai",
+                "api-to-typemcp",
+                "0.2.4",
+                attempts=1,
+                delay_seconds=0,
+                opener=Mock(side_effect=[upstream_error]),
+                sleep=Mock(),
+            )
+
+        class MalformedResponse:
+            status = 200
+
+            def read(self) -> bytes:
+                return b"not-json"
+
+            def __enter__(self) -> "MalformedResponse":
+                return self
+
+            def __exit__(self, *_: object) -> None:
+                return None
+
+        with self.assertRaisesRegex(SystemExit, "malformed JSON"):
+            waiter.wait_for_publication(
+                "https://clawhub.ai",
+                "api-to-typemcp",
+                "0.2.4",
+                attempts=1,
+                delay_seconds=0,
+                opener=Mock(return_value=MalformedResponse()),
+                sleep=Mock(),
+            )
+
+    def test_clawhub_publish_reconciles_async_status_with_one_publish_mutation(self) -> None:
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+
+        self.assertTrue(CLAWHUB_WAITER.is_file())
+        self.assertIn("pending-publication", workflow)
+        self.assertIn("wait_for_clawhub_publication.py", workflow)
+        self.assertIn("--attempts 12", workflow)
+        self.assertEqual(workflow.count("skill publish skills/api-to-typemcp"), 1)
+        self.assertIn("CLAW_HUB_PUBLICATION", workflow)
+
     def test_clawhub_publish_requires_public_confirmation_for_the_released_version(self) -> None:
         """A pending ClawHub submission is not a successful public publication."""
         workflow = WORKFLOW.read_text(encoding="utf-8")
 
         self.assertIn('publication="$(bun .clawhub-source/packages/clawhub/src/cli.ts', workflow)
         self.assertIn('json.loads(os.environ["CLAW_HUB_PUBLICATION"])', workflow)
-        self.assertIn('payload.get("status") != "published"', workflow)
-        self.assertIn('payload.get("publicationStatus") != "published"', workflow)
         self.assertIn('payload.get("version") != expected_version', workflow)
-        self.assertIn("ClawHub public confirmation failed", workflow)
+        self.assertIn("wait_for_clawhub_publication.py", workflow)
 
 
 if __name__ == "__main__":
