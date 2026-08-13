@@ -507,7 +507,8 @@ class SkillReleaseTests(unittest.TestCase):
         self.assertTrue(CLAWHUB_WAITER.is_file())
         self.assertIn("pending-publication", workflow)
         self.assertIn("wait_for_clawhub_publication.py", workflow)
-        self.assertIn("--attempts 12", workflow)
+        self.assertIn("--attempts 36", workflow)
+        self.assertIn("--delay-seconds 10", workflow)
         self.assertEqual(workflow.count("skill publish skills/api-to-typemcp"), 1)
         self.assertIn("CLAW_HUB_PUBLICATION", workflow)
 
