@@ -81,7 +81,7 @@ class RenderTests(unittest.TestCase):
         pkg = json.loads((out / "package.json").read_text())
         deps = pkg.get("dependencies", {})
         self.assertIn("@theorvane/type-mcp", deps)
-        self.assertEqual(deps["@theorvane/type-mcp"], "0.2.0")
+        self.assertEqual(deps["@theorvane/type-mcp"], "0.3.2")
         self.assertIn("zod", deps)
         # No local/git/file dependencies.
         for name, version in deps.items():
