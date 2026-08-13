@@ -131,16 +131,17 @@ class GeneratedProjectE2ETests(unittest.TestCase):
         """The installed node_modules must contain the published @theorvane/type-mcp."""
         results = self._verify(skip_mcp=True)
         self.assertTrue(results["install"]["ok"], "install failed")
-        # Check that the resolved package is from npm, not a local path.
-        pkg_lock = self.project / "package-lock.json"
-        # package-lock.json may not exist in the source project (only after install),
-        # so we check node_modules in the verify workspace via a targeted re-run.
-        # Instead, verify the package.json declaration.
-        pkg = json.loads((self.project / "package.json").read_text())
-        dep = pkg.get("dependencies", {}).get("@theorvane/type-mcp", "")
-        self.assertEqual(dep, "0.2.0", f"Unexpected dep version: {dep}")
-        self.assertNotIn("file:", dep)
-        self.assertNotIn("git:", dep)
+        installed_runtime = results["installed_runtime"]
+        self.assertTrue(installed_runtime["ok"], installed_runtime)
+        self.assertEqual(installed_runtime["version"], "0.3.2")
+        self.assertEqual(
+            installed_runtime["resolved"],
+            "https://registry.npmjs.org/@theorvane/type-mcp/-/type-mcp-0.3.2.tgz",
+        )
+        self.assertEqual(
+            installed_runtime["integrity"],
+            "sha512-Rpspxnyl+UZeeakhng9PSCdsnVM4BTBkZ2XQsI5/ywoAU8OAKUMS+DQntY6aNCCgTtzwb3u0Wq7YVrSxfRwwWg==",
+        )
 
     # ------------------------------------------------------------------
     # MCP stdio smoke: read tool

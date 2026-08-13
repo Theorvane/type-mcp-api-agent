@@ -42,7 +42,23 @@ class GeneratedProjectVerificationSecurityTests(unittest.TestCase):
         self.assertIn('"vitest": "^4.1.10"', package_template)
         self.assertNotIn('"@modelcontextprotocol/sdk": "^1.0.0"', package_template)
         self.assertNotIn('"vitest": "^3.0.0"', package_template)
-        self.assertIn('"@hono/node-server": "2.0.12"', package_template)
+        self.assertIn('"@theorvane/type-mcp": "0.3.2"', package_template)
+        self.assertNotIn('"@theorvane/type-mcp": "0.2.0"', package_template)
+        lockfile = json.loads(
+            (SKILL_DIR / "templates" / "typescript-stdio" / "package-lock.json.tmpl").read_text()
+        )
+        type_mcp = lockfile["packages"]["node_modules/@theorvane/type-mcp"]
+        self.assertEqual(type_mcp["version"], "0.3.2")
+        self.assertEqual(
+            type_mcp["resolved"],
+            "https://registry.npmjs.org/@theorvane/type-mcp/-/type-mcp-0.3.2.tgz",
+        )
+        self.assertEqual(
+            type_mcp["integrity"],
+            "sha512-Rpspxnyl+UZeeakhng9PSCdsnVM4BTBkZ2XQsI5/ywoAU8OAKUMS+DQntY6aNCCgTtzwb3u0Wq7YVrSxfRwwWg==",
+        )
+        self.assertEqual(lockfile["packages"][""]["dependencies"]["@theorvane/type-mcp"], "0.3.2")
+        self.assertEqual(type_mcp["dependencies"]["@modelcontextprotocol/sdk"], "1.30.0")
 
     def test_template_lockfile_resolves_patched_security_dependency_versions(self) -> None:
         """Generated projects must pin patched transitive resolutions."""
