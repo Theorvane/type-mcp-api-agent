@@ -226,7 +226,7 @@ jobs:
             --registry "$CLAWHUB_REGISTRY" \
             --slug api-to-typemcp \
             --version "$SKILL_VERSION" \
-            --attempts 12 \
+            --attempts 36 \
             --delay-seconds 10
 
   publish-skills-hub-ai:
