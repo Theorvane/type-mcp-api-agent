@@ -61,6 +61,13 @@ class GeneratedProjectVerificationSecurityTests(unittest.TestCase):
             "sha512-gHwA1O9LDIcKunMKhObS/HimwtehO1nPUECKAu5TpKgaO19fcWEl4bliWe1jWxVFvIXztJjjQ4L8XQ1EU9f7Jw==",
         )
         self.assertEqual(packages["node_modules/postcss"]["version"], "8.5.24")
+        hono = packages["node_modules/hono"]
+        self.assertEqual(hono["version"], "4.12.34")
+        self.assertEqual(hono["resolved"], "https://registry.npmjs.org/hono/-/hono-4.12.34.tgz")
+        self.assertEqual(
+            hono["integrity"],
+            "sha512-GqXJqY/xJkJmuloTrnV1ZEXG3fqte+VjkUqoRNZXcrUidiUOP4fMSIHHY4tsqZBK++kVyWmt/AAfSUuy57/eSA==",
+        )
 
 
 if __name__ == "__main__":
