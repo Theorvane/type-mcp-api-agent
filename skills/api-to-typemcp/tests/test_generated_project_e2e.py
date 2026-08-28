@@ -133,14 +133,14 @@ class GeneratedProjectE2ETests(unittest.TestCase):
         self.assertTrue(results["install"]["ok"], "install failed")
         installed_runtime = results["installed_runtime"]
         self.assertTrue(installed_runtime["ok"], installed_runtime)
-        self.assertEqual(installed_runtime["version"], "0.3.2")
+        self.assertEqual(installed_runtime["version"], "0.4.0")
         self.assertEqual(
             installed_runtime["resolved"],
-            "https://registry.npmjs.org/@theorvane/type-mcp/-/type-mcp-0.3.2.tgz",
+            "https://registry.npmjs.org/@theorvane/type-mcp/-/type-mcp-0.4.0.tgz",
         )
         self.assertEqual(
             installed_runtime["integrity"],
-            "sha512-Rpspxnyl+UZeeakhng9PSCdsnVM4BTBkZ2XQsI5/ywoAU8OAKUMS+DQntY6aNCCgTtzwb3u0Wq7YVrSxfRwwWg==",
+            "sha512-RqB3B9Jq2hm9a8hUdLg7gBpg/SXb3PmsNaha5qejv7MSTYIOpj/0k4e5oWIGIXGiWX2rbYQ+AfRGwqVCZ1PGyA==",
         )
 
     # ------------------------------------------------------------------

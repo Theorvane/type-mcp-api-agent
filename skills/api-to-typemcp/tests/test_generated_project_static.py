@@ -3,7 +3,7 @@
 Validates generated code structure without running npm/node:
 - package.json has no file:/git:/link: dependencies
 - server.ts uses only published TypeMCP APIs
-- index.ts calls createMcpServer + startStdioServer
+- index.ts calls createMcpServer + serveStdioServer
 - policy.ts rejects wildcards before request construction
 - .env.example has variable names only (no values)
 - All generated files are valid UTF-8
@@ -103,13 +103,14 @@ class GeneratedProjectStaticTests(unittest.TestCase):
         self.assertIn("@McpTool", server)
 
     # ------------------------------------------------------------------
-    # index.ts: createMcpServer + startStdioServer
+    # index.ts: createMcpServer + serveStdioServer
     # ------------------------------------------------------------------
 
     def test_index_starts_stdio(self) -> None:
         index = (self.out / "src" / "index.ts").read_text()
         self.assertIn("createMcpServer", index)
-        self.assertIn("startStdioServer", index)
+        self.assertIn("serveStdioServer(() => createMcpServer(", index)
+        self.assertNotIn("startStdioServer", index)
         # Must not use HTTP transport in the default stdio template.
         self.assertNotIn("startHttpServer", index)
 
