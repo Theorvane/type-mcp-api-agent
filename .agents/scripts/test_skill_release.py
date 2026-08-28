@@ -76,7 +76,7 @@ class SkillReleaseTests(unittest.TestCase):
                 else:
                     os.environ["GITHUB_OUTPUT"] = previous_output
 
-            self.assertEqual(output_path.read_text(encoding="utf-8"), "skill_version=0.2.6\ntag=v0.2.6\n")
+            self.assertEqual(output_path.read_text(encoding="utf-8"), "skill_version=0.2.7\ntag=v0.2.7\n")
 
     def test_version_extraction_step_rejects_invalid_numeric_prerelease_identifiers(self) -> None:
         workflow = WORKFLOW.read_text(encoding="utf-8")
@@ -96,7 +96,7 @@ class SkillReleaseTests(unittest.TestCase):
                 skill_path = root / "skills/api-to-typemcp/SKILL.md"
                 skill_path.parent.mkdir(parents=True)
                 skill_path.write_text(
-                    original.replace("version: 0.2.6", f"version: {invalid_version}"),
+                    original.replace("version: 0.2.7", f"version: {invalid_version}"),
                     encoding="utf-8",
                 )
                 previous_cwd = Path.cwd()
@@ -254,9 +254,9 @@ class SkillReleaseTests(unittest.TestCase):
             [
                 (200, {"data": [{"slug": "integration"}]}),
                 (200, {"slug": "api-to-typemcp", "status": "DRAFT"}),
-                (200, {"slug": "api-to-typemcp", "status": "PUBLISHED", "latestVersion": "0.2.6"}),
-                (200, [{"version": "0.2.6"}]),
-                (200, {"slug": "api-to-typemcp", "status": "PUBLISHED", "latestVersion": "0.2.6"}),
+                (200, {"slug": "api-to-typemcp", "status": "PUBLISHED", "latestVersion": "0.2.7"}),
+                (200, [{"version": "0.2.7"}]),
+                (200, {"slug": "api-to-typemcp", "status": "PUBLISHED", "latestVersion": "0.2.7"}),
             ]
         )
         calls: list[tuple[str, str]] = []
@@ -269,7 +269,7 @@ class SkillReleaseTests(unittest.TestCase):
 
         environment = {
             "SKILLS_HUB_AI_API_KEY": "test-key",
-            "SKILL_VERSION": "0.2.6",
+            "SKILL_VERSION": "0.2.7",
             "GITHUB_SHA": "test-sha",
             "GITHUB_REPOSITORY": "Theorvane/type-mcp-api-agent-skill",
         }
@@ -291,8 +291,8 @@ class SkillReleaseTests(unittest.TestCase):
                 (200, {"slug": "api-to-typemcp", "status": "PUBLISHED"}),
                 (200, []),
                 (409, {"error": "version already exists"}),
-                (200, [{"version": "0.2.6"}]),
-                (200, {"slug": "api-to-typemcp", "status": "PUBLISHED", "latestVersion": "0.2.6"}),
+                (200, [{"version": "0.2.7"}]),
+                (200, {"slug": "api-to-typemcp", "status": "PUBLISHED", "latestVersion": "0.2.7"}),
             ]
         )
         calls: list[tuple[str, str]] = []
@@ -305,7 +305,7 @@ class SkillReleaseTests(unittest.TestCase):
 
         environment = {
             "SKILLS_HUB_AI_API_KEY": "test-key",
-            "SKILL_VERSION": "0.2.6",
+            "SKILL_VERSION": "0.2.7",
             "GITHUB_SHA": "test-sha",
             "GITHUB_REPOSITORY": "Theorvane/type-mcp-api-agent-skill",
         }
@@ -416,13 +416,13 @@ class SkillReleaseTests(unittest.TestCase):
         payload = waiter.wait_for_publication(
             "https://clawhub.ai",
             "api-to-typemcp",
-            "0.2.6",
+            "0.2.7",
             attempts=2,
             delay_seconds=0,
-            opener=Mock(side_effect=[pending, Response({"version": {"version": "0.2.6"}})]),
+            opener=Mock(side_effect=[pending, Response({"version": {"version": "0.2.7"}})]),
             sleep=Mock(),
         )
-        self.assertEqual(payload["version"], {"version": "0.2.6"})
+        self.assertEqual(payload["version"], {"version": "0.2.7"})
 
     def test_clawhub_pending_publication_times_out_and_mismatched_versions_fail_closed(self) -> None:
         spec = importlib.util.spec_from_file_location("wait_for_clawhub_publication", CLAWHUB_WAITER)
@@ -436,7 +436,7 @@ class SkillReleaseTests(unittest.TestCase):
             waiter.wait_for_publication(
                 "https://clawhub.ai",
                 "api-to-typemcp",
-                "0.2.6",
+                "0.2.7",
                 attempts=1,
                 delay_seconds=0,
                 opener=Mock(side_effect=[pending]),
@@ -459,7 +459,7 @@ class SkillReleaseTests(unittest.TestCase):
             waiter.wait_for_publication(
                 "https://clawhub.ai",
                 "api-to-typemcp",
-                "0.2.6",
+                "0.2.7",
                 attempts=1,
                 delay_seconds=0,
                 opener=Mock(return_value=Response()),
@@ -471,7 +471,7 @@ class SkillReleaseTests(unittest.TestCase):
             waiter.wait_for_publication(
                 "https://clawhub.ai",
                 "api-to-typemcp",
-                "0.2.6",
+                "0.2.7",
                 attempts=1,
                 delay_seconds=0,
                 opener=Mock(side_effect=[upstream_error]),
@@ -494,7 +494,7 @@ class SkillReleaseTests(unittest.TestCase):
             waiter.wait_for_publication(
                 "https://clawhub.ai",
                 "api-to-typemcp",
-                "0.2.6",
+                "0.2.7",
                 attempts=1,
                 delay_seconds=0,
                 opener=Mock(return_value=MalformedResponse()),
