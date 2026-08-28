@@ -7,8 +7,8 @@ from pathlib import Path
 
 
 SKILL_ROOT = Path(__file__).resolve().parents[1]
-TYPE_MCP_CURRENT_RELEASE = "@theorvane/type-mcp@0.3.2"
-TYPE_MCP_RELEASE_SHA = "e75bcf6a81ef4df57301b6154a0088845020886f"
+TYPE_MCP_CURRENT_RELEASE = "@theorvane/type-mcp@0.4.0"
+TYPE_MCP_RELEASE_SHA = "4141d25c287e57a76b905bd6f77c4681ab335378"
 STANDARD_DECORATOR_IMPORT = 'import { McpServer, McpTool } from "@theorvane/type-mcp"'
 LEGACY_DECORATOR_IMPORT = 'import { McpServer, McpTool } from "@theorvane/type-mcp/legacy"'
 
@@ -41,6 +41,9 @@ class RuntimeDocumentationContractTests(unittest.TestCase):
         self.assertIn(STANDARD_DECORATOR_IMPORT, server_renderer)
         self.assertNotIn("@theorvane/type-mcp/legacy", server_renderer)
         self.assertNotIn("experimentalDecorators", tsconfig_template)
+        index_template = (SKILL_ROOT / "templates/typescript-stdio/src/index.ts.tmpl").read_text(encoding="utf-8")
+        self.assertIn("serveStdioServer", index_template)
+        self.assertNotIn("startStdioServer", index_template)
 
 
 if __name__ == "__main__":

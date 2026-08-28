@@ -38,27 +38,32 @@ class GeneratedProjectVerificationSecurityTests(unittest.TestCase):
     def test_template_uses_patched_dependency_ranges(self) -> None:
         """Generated projects must not carry the ranges flagged by the security audit."""
         package_template = (SKILL_DIR / "templates" / "typescript-stdio" / "package.json.tmpl").read_text()
-        self.assertIn('"@modelcontextprotocol/sdk": "^1.30.0"', package_template)
+        self.assertIn('"@modelcontextprotocol/client": "2.0.0"', package_template)
+        self.assertNotIn('"@modelcontextprotocol/sdk"', package_template)
         self.assertIn('"vitest": "^4.1.10"', package_template)
         self.assertNotIn('"@modelcontextprotocol/sdk": "^1.0.0"', package_template)
         self.assertNotIn('"vitest": "^3.0.0"', package_template)
-        self.assertIn('"@theorvane/type-mcp": "0.3.2"', package_template)
+        self.assertIn('"@theorvane/type-mcp": "0.4.0"', package_template)
         self.assertNotIn('"@theorvane/type-mcp": "0.2.0"', package_template)
         lockfile = json.loads(
             (SKILL_DIR / "templates" / "typescript-stdio" / "package-lock.json.tmpl").read_text()
         )
         type_mcp = lockfile["packages"]["node_modules/@theorvane/type-mcp"]
-        self.assertEqual(type_mcp["version"], "0.3.2")
+        self.assertEqual(type_mcp["version"], "0.4.0")
         self.assertEqual(
             type_mcp["resolved"],
-            "https://registry.npmjs.org/@theorvane/type-mcp/-/type-mcp-0.3.2.tgz",
+            "https://registry.npmjs.org/@theorvane/type-mcp/-/type-mcp-0.4.0.tgz",
         )
         self.assertEqual(
             type_mcp["integrity"],
-            "sha512-Rpspxnyl+UZeeakhng9PSCdsnVM4BTBkZ2XQsI5/ywoAU8OAKUMS+DQntY6aNCCgTtzwb3u0Wq7YVrSxfRwwWg==",
+            "sha512-RqB3B9Jq2hm9a8hUdLg7gBpg/SXb3PmsNaha5qejv7MSTYIOpj/0k4e5oWIGIXGiWX2rbYQ+AfRGwqVCZ1PGyA==",
         )
-        self.assertEqual(lockfile["packages"][""]["dependencies"]["@theorvane/type-mcp"], "0.3.2")
-        self.assertEqual(type_mcp["dependencies"]["@modelcontextprotocol/sdk"], "1.30.0")
+        self.assertEqual(lockfile["packages"][""]["dependencies"]["@theorvane/type-mcp"], "0.4.0")
+        self.assertEqual(type_mcp["dependencies"]["@modelcontextprotocol/client"], "2.0.0")
+        self.assertEqual(type_mcp["dependencies"]["@modelcontextprotocol/server"], "2.0.0")
+        self.assertEqual(
+            lockfile["packages"][""]["devDependencies"]["@modelcontextprotocol/client"], "2.0.0"
+        )
 
     def test_template_lockfile_resolves_patched_security_dependency_versions(self) -> None:
         """Generated projects must pin patched transitive resolutions."""
@@ -66,17 +71,12 @@ class GeneratedProjectVerificationSecurityTests(unittest.TestCase):
             (SKILL_DIR / "templates" / "typescript-stdio" / "package-lock.json.tmpl").read_text()
         )
         packages = lockfile["packages"]
-        fast_uri = packages["node_modules/fast-uri"]
-        self.assertEqual(fast_uri["version"], "3.1.5")
-        self.assertEqual(
-            fast_uri["resolved"],
-            "https://registry.npmjs.org/fast-uri/-/fast-uri-3.1.5.tgz",
-        )
-        self.assertEqual(
-            fast_uri["integrity"],
-            "sha512-gHwA1O9LDIcKunMKhObS/HimwtehO1nPUECKAu5TpKgaO19fcWEl4bliWe1jWxVFvIXztJjjQ4L8XQ1EU9f7Jw==",
-        )
-        self.assertEqual(packages["node_modules/postcss"]["version"], "8.5.24")
+        self.assertNotIn("node_modules/@modelcontextprotocol/sdk", packages)
+        self.assertNotIn("node_modules/fast-uri", packages)
+        self.assertEqual(packages["node_modules/@modelcontextprotocol/client"]["version"], "2.0.0")
+        self.assertEqual(packages["node_modules/@modelcontextprotocol/server"]["version"], "2.0.0")
+        self.assertEqual(packages["node_modules/@hono/node-server"]["version"], "2.1.1")
+        self.assertEqual(packages["node_modules/postcss"]["version"], "8.5.26")
         hono = packages["node_modules/hono"]
         self.assertEqual(hono["version"], "4.12.34")
         self.assertEqual(hono["resolved"], "https://registry.npmjs.org/hono/-/hono-4.12.34.tgz")

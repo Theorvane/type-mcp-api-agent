@@ -1,12 +1,12 @@
 # TypeMCP Runtime Contract
 
-Generated projects use the reviewed public npm package on the current 0.3.2 release line:
+Generated projects use the reviewed public npm package on the current 0.4.0 release line:
 
 ```json
-"@theorvane/type-mcp": "0.3.2"
+"@theorvane/type-mcp": "0.4.0"
 ```
 
-`@theorvane/type-mcp@0.3.2` is published with npm registry `gitHead` and GitHub Release `v0.3.2` both resolving to `e75bcf6a81ef4df57301b6154a0088845020886f`.
+`@theorvane/type-mcp@0.4.0` is published with npm registry `gitHead` and GitHub Release `v0.4.0` both resolving to `4141d25c287e57a76b905bd6f77c4681ab335378`.
 
 ## Allowed public API
 
@@ -21,13 +21,15 @@ Generated TypeScript uses only these public exports:
 - `@McpServer`
 - `@McpTool`
 - `createMcpServer`
-- `startStdioServer`
+- `serveStdioServer`
 - `zod`
 - an explicit `InstanceResolver`
 
-`createMcpServer` and `startStdioServer` are asynchronous and must be awaited. Standard decorators use TC39 semantics: generated `tsconfig.json` must not enable legacy `experimentalDecorators` or `emitDecoratorMetadata`.
+`createMcpServer` is asynchronous. Pass it through a fresh-server factory to `serveStdioServer`; the returned handle owns protocol negotiation and shutdown. Standard decorators use TC39 semantics: generated `tsconfig.json` must not enable legacy `experimentalDecorators` or `emitDecoratorMetadata`.
 
-`@McpTool` requires an `input` Zod object. Generated code pins Zod v4 (`^4.4.3`) because that is the compatible public runtime contract for `@theorvane/type-mcp@0.3.2`.
+Contained MCP smoke verification imports the exact split SDK v2 client package, `@modelcontextprotocol/client@2.0.0`; generated runtime hosting remains owned by TypeMCP and its server dependency.
+
+`@McpTool` requires an `input` Zod object. Generated code pins Zod v4 (`^4.4.3`) because that is the compatible public runtime contract for `@theorvane/type-mcp@0.4.0`.
 
 ## Legacy decorator compatibility
 

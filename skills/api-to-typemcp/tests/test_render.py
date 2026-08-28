@@ -81,7 +81,7 @@ class RenderTests(unittest.TestCase):
         pkg = json.loads((out / "package.json").read_text())
         deps = pkg.get("dependencies", {})
         self.assertIn("@theorvane/type-mcp", deps)
-        self.assertEqual(deps["@theorvane/type-mcp"], "0.3.2")
+        self.assertEqual(deps["@theorvane/type-mcp"], "0.4.0")
         self.assertIn("zod", deps)
         # No local/git/file dependencies.
         for name, version in deps.items():
@@ -111,7 +111,9 @@ class RenderTests(unittest.TestCase):
         out = self._generate_project()
         index_ts = (out / "src" / "index.ts").read_text()
         self.assertIn("createMcpServer", index_ts)
-        self.assertIn("startStdioServer", index_ts)
+        self.assertIn("serveStdioServer", index_ts)
+        self.assertIn("serveStdioServer(() => createMcpServer(", index_ts)
+        self.assertNotIn("startStdioServer", index_ts)
 
     # ------------------------------------------------------------------
     # policy.ts

@@ -126,8 +126,8 @@ def _run_step(
 # ---------------------------------------------------------------------------
 
 _SMOKE_READ_MJS = textwrap.dedent("""\
-    import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-    import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+    import { Client } from "@modelcontextprotocol/client";
+    import { StdioClientTransport } from "@modelcontextprotocol/client/stdio";
 
     const transport = new StdioClientTransport({
       command: "node",
@@ -157,8 +157,8 @@ _SMOKE_READ_MJS = textwrap.dedent("""\
 """)
 
 _SMOKE_WRITE_DENY_MJS = textwrap.dedent("""\
-    import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-    import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+    import { Client } from "@modelcontextprotocol/client";
+    import { StdioClientTransport } from "@modelcontextprotocol/client/stdio";
 
     // Deliberately do NOT set TYPE_MCP_ALLOW_PROTECTED_OPERATIONS.
     const transport = new StdioClientTransport({
